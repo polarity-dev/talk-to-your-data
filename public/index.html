@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Talk to your data</title>
+<style>
+
+body {
+  font-family: Arial, sans-serif;
+  padding: 10px;
+  background-color: #F8F8F8;
+  color: #333;
+}
+
+div {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+h1, h2 {
+  color: #333;
+  text-align: center;
+}
+
+textarea {
+  font-size: 16px;
+  height: 100px;
+  padding: 10px;
+  box-sizing: border-box;
+  width: 100%;
+  margin-bottom: 10px;
+}
+
+button {
+  font-size: 16px;
+  padding: 10px;
+  color: #FFF;
+  background-color: #555;
+  border: none;
+  cursor: pointer;
+}
+
+button:hover {
+  background-color: #444;
+}
+
+#response {
+    margin: 20px 0;
+    word-wrap: break-word;
+    padding: 10px;
+    border: 1px solid #ccc;
+    background-color: #fff;
+    box-sizing: border-box;
+}
+
+@media (min-width: 600px) {
+  div {
+    width: 500px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  #response {
+    margin: 40px 0;
+  }
+}
+
+</style>
+</head>
+<body>
+  <div>
+    <h1>Talk to your data</h1>
+    <h2>Teach something to the AI</h2>
+    <textarea
+      id="createEmbeddingText"
+      maxlength="4000"
+    ></textarea>
+    <br/>
+    <button onclick="createEmbedding()" id="createEmbeddingButton"">Add data</button>
+  </div>
+
+  <div>
+    <h2>Talk to the AI about your data</h2>
+    <textarea
+      id="talk2dataText"
+      maxlength="4000"
+    ></textarea>
+    <br/>
+    <button onclick="talk2data()" id="talk2dataButton"> Chat </button>
+
+    <p id="response"></p>
+  </div>
+<script>
+  const createEmbeddingButton = document.getElementById("createEmbeddingButton")
+  const createEmbeddingText = document.getElementById("createEmbeddingText")
+  const talk2dataButton = document.getElementById("talk2dataButton")
+  const talk2dataText = document.getElementById("talk2dataText")
+  const gptResponse = document.getElementById("response")
+
+  const createEmbedding = () => {
+    const text = createEmbeddingText.value
+
+    if (!text.length) {
+      return
+    }
+
+    createEmbeddingText.disabled = true
+    createEmbeddingButton.disabled = true
+
+    console.log(createEmbeddingText.value)
+    fetch('/createEmbedding', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        text
+      })
+    })
+      .then(res => res.json())
+      .then(data => {
+        createEmbeddingText.value = ""
+        alert("I learned something new!")
+      })
+      .catch((err) => {
+        alert(err.message)
+      })
+      .finally(() => {
+        createEmbeddingText.disabled = false
+        createEmbeddingButton.disabled = false
+      })
+  }
+
+  function talk2data() {
+    const prompt = talk2dataText.value
+
+    if (!prompt) {
+      return
+    }
+
+    talk2dataButton.disabled = true
+    talk2dataText.disabled = true
+    gptResponse.innerHTML = "Loading..."
+
+    fetch('/chat', {
+      method: 'POST',
+      headers: {
+          'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+          prompt
+      })
+    })
+      .then(res => res.json())
+      .then(data => {
+        gptResponse.innerHTML = data.response
+        talk2dataText.value = ""
+      })
+      .catch((err) => {
+        alert(err.message)
+      })
+      .finally(() => {
+        talk2dataButton.disabled = false
+        talk2dataText.disabled = false
+      })
+  }
+</script>
+</body>
+</html>
