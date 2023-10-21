@@ -33,8 +33,10 @@ void (async () => {
   app.use(express.json())
 
   app.post("/createEmbedding", async (req, res) => {
-    await addEmbedding(redisClient, randomUUID(), req.body.text)
-    console.log("Embedding created")
+    const text = req.body.text
+    const id = randomUUID()
+    await addEmbedding(redisClient, id, text)
+    console.log("Embedding created:", id, text)
     res.json({ success: true })
   })
 
