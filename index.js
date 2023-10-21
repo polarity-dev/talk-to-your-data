@@ -12,7 +12,13 @@ void (async () => {
   const app = express()
   const redisClient = createClient()
 
-  redisClient.on('error', err => console.log('Redis Client Error', err))
+  redisClient.on('error', err => {
+    if (err.code === "ECONNREFUSED") {
+      console.log("waiting for redis to start...")
+    } else {
+      console.log('Redis Client Error', err)
+    }
+  })
 
   await redisClient.connect()
 
