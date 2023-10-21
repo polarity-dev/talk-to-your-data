@@ -4,6 +4,8 @@ const express = require("express")
 const { randomUUID } = require("crypto")
 const { addEmbedding, chat, createRedisStackIndex } = require("./core")
 
+const { urlencoded } = express
+
 const {
   PORT
 } = process.env
@@ -32,7 +34,7 @@ void (async () => {
 
   app.use(express.json())
 
-  app.post("/createEmbedding", async (req, res) => {
+  app.post("/createEmbedding", urlencoded({ "extended": true }), async (req, res) => {
     const text = req.body.text
     const id = randomUUID()
     await addEmbedding(redisClient, id, text)
@@ -40,12 +42,10 @@ void (async () => {
     res.json({ success: true })
   })
 
-  app.post("/chat", async (req, res) => {
+  app.post("/chat", urlencoded({ "extended": true }), async (req, res) => {
     try {
-    const output = await chat(req.body.prompt, redisClient)
-    res.json({
-      response: output
-    })
+      const output = await chat(req.body.text, redisClient)
+      res.send(output)
     } catch(err) {
       console.log("Error in /chat", err)
       res.status(500).send(err)

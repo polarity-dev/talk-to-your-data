@@ -34,13 +34,18 @@ textarea {
   margin-bottom: 10px;
 }
 
-button {
+input[type="submit"] {
   font-size: 16px;
   padding: 10px;
   color: #FFF;
   background-color: #555;
   border: none;
   cursor: pointer;
+  width: 100%;
+}
+
+input[type="submit"]:disabled {
+  background-color: #888;
 }
 
 button:hover {
@@ -69,103 +74,84 @@ button:hover {
 }
 
 </style>
+<script src="/htmx.min.js"></script>
 </head>
 <body>
   <div>
     <h1>Talk to your data</h1>
     <h2>Teach something to the AI</h2>
-    <textarea
-      id="createEmbeddingText"
-      maxlength="4000"
-    ></textarea>
-    <br/>
-    <button onclick="createEmbedding()" id="createEmbeddingButton"">Add data</button>
+    <form
+      hx-boost="true"
+      action="/createEmbedding"
+      method="post"
+      hx-push-url="false"
+      hx-swap="none"
+      hx-on::before-send="handleBeforeSend(event)"
+      hx-on::after-request="handleAfterAdd(event)"
+    >
+      <textarea
+        name="text"
+        maxlength="4000"
+      ></textarea>
+      <br/>
+      <input
+        type="submit"
+        value="Add data"
+      />
+    </form>
   </div>
 
   <div>
     <h2>Talk to the AI about your data</h2>
-    <textarea
-      id="talk2dataText"
-      maxlength="4000"
-    ></textarea>
-    <br/>
-    <button onclick="talk2data()" id="talk2dataButton"> Chat </button>
+    <form
+      hx-boost="true"
+      action="/chat"
+      method="post"
+      hx-push-url="false"
+      hx-target="#response"
+      hx-swap="innerHTML"
+      hx-on::before-send="handleBeforeSend(event)"
+      hx-on::after-request="handleAfterChat(event)"
+    >
+      <textarea
+        name="text"
+        maxlength="4000"
+      ></textarea>
+      <br/>
+      <input
+        type="submit"
+        value="Chat"
+      />
+    </form>
 
     <p id="response"></p>
   </div>
 <script>
-  const createEmbeddingButton = document.getElementById("createEmbeddingButton")
-  const createEmbeddingText = document.getElementById("createEmbeddingText")
-  const talk2dataButton = document.getElementById("talk2dataButton")
-  const talk2dataText = document.getElementById("talk2dataText")
-  const gptResponse = document.getElementById("response")
+  function handleBeforeSend(event) {
+    const textArea = event.target.querySelector("textarea")
+    const button = event.target.querySelector("input[type='submit']")
 
-  const createEmbedding = () => {
-    const text = createEmbeddingText.value
-
-    if (!text.length) {
-      return
-    }
-
-    createEmbeddingText.disabled = true
-    createEmbeddingButton.disabled = true
-
-    console.log(createEmbeddingText.value)
-    fetch('/createEmbedding', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({
-        text
-      })
-    })
-      .then(res => res.json())
-      .then(data => {
-        createEmbeddingText.value = ""
-        alert("I learned something new!")
-      })
-      .catch((err) => {
-        alert(err.message)
-      })
-      .finally(() => {
-        createEmbeddingText.disabled = false
-        createEmbeddingButton.disabled = false
-      })
+    textArea.disabled = true
+    button.disabled = true
   }
 
-  function talk2data() {
-    const prompt = talk2dataText.value
+  function handleAfterAdd(event) {
+    const textArea = event.target.querySelector("textarea")
+    const button = event.target.querySelector("input[type='submit']")
 
-    if (!prompt) {
-      return
-    }
+    textArea.disabled = false
+    button.disabled = false
+    textArea.value = ""
+    alert("I learned something new!")
+  }
 
-    talk2dataButton.disabled = true
-    talk2dataText.disabled = true
-    gptResponse.innerHTML = "Loading..."
+  function handleAfterChat(event) {
+    const textArea = event.target.querySelector("textarea")
+    const button = event.target.querySelector("input[type='submit']")
 
-    fetch('/chat', {
-      method: 'POST',
-      headers: {
-          'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({
-          prompt
-      })
-    })
-      .then(res => res.json())
-      .then(data => {
-        gptResponse.innerHTML = data.response
-        talk2dataText.value = ""
-      })
-      .catch((err) => {
-        alert(err.message)
-      })
-      .finally(() => {
-        talk2dataButton.disabled = false
-        talk2dataText.disabled = false
-      })
+    textArea.disabled = false
+    button.disabled = false
+    textArea.value = ""
   }
 </script>
 </body>
