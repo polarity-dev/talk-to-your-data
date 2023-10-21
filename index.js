@@ -59,8 +59,7 @@ void (async () => {
       const output = await chat(req.body.text, redisClient)
       res.render("partials/chat", { "response": output })
     } catch(err) {
-      console.log("Error in /chat", err)
-      res.status(500).send(err)
+      res.status(500).render("partials/chat", { "error": err })
     }
   })
 

@@ -5,6 +5,7 @@
   hx-push-url="false"
   hx-swap="outerHTML"
   hx-target="this"
+  hx-target-5*="this"
   hx-on::before-send="handleBeforeSend(event)"
 >
   <textarea
@@ -16,5 +17,9 @@
     type="submit"
     value="Chat"
   />
+  {{#if error}}
+  <p class="response error">{{error}}</p>
+  {{else}}
   <p class="response">{{#if response}}{{response}}{{/if}}</p>
+  {{/if}}
 </form>
