@@ -14,7 +14,7 @@ npm i
 ```
 
 ``` sh
-cp .env-sample .env #fill add openapi key to the env file
+cp .env-sample .env #fill the openapi key to the env file
 ```
 
 ## Start
