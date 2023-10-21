@@ -4,6 +4,8 @@ const express = require("express")
 const { randomUUID } = require("crypto")
 const { addEmbedding, chat, createRedisStackIndex } = require("./core")
 
+const { urlencoded } = express
+
 const {
   PORT
 } = process.env
@@ -32,7 +34,7 @@ void (async () => {
 
   app.use(express.json())
 
-  app.post("/createEmbedding", async (req, res) => {
+  app.post("/createEmbedding", urlencoded({ "extended": true }), async (req, res) => {
     const text = req.body.text
     const id = randomUUID()
     await addEmbedding(redisClient, id, text)

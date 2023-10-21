@@ -34,13 +34,14 @@ textarea {
   margin-bottom: 10px;
 }
 
-button {
+input[type="submit"] {
   font-size: 16px;
   padding: 10px;
   color: #FFF;
   background-color: #555;
   border: none;
   cursor: pointer;
+  width: 100%;
 }
 
 button:hover {
@@ -69,69 +70,71 @@ button:hover {
 }
 
 </style>
+<script src="/htmx.min.js"></script>
 </head>
 <body>
   <div>
     <h1>Talk to your data</h1>
     <h2>Teach something to the AI</h2>
-    <textarea
-      id="createEmbeddingText"
-      maxlength="4000"
-    ></textarea>
-    <br/>
-    <button onclick="createEmbedding()" id="createEmbeddingButton"">Add data</button>
+    <form
+      hx-boost="true"
+      action="/createEmbedding"
+      method="post"
+      hx-push-url="false"
+      hx-swap="none"
+      hx-on::before-send="handleBeforeSend(event)"
+      hx-on::after-request="handleAfterRequest(event)"
+    >
+      <textarea
+        name="text"
+        maxlength="4000"
+      ></textarea>
+      <br/>
+      <input
+        type="submit"
+        value="Add data"
+      />
+    </form>
   </div>
 
   <div>
     <h2>Talk to the AI about your data</h2>
-    <textarea
-      id="talk2dataText"
-      maxlength="4000"
-    ></textarea>
-    <br/>
-    <button onclick="talk2data()" id="talk2dataButton"> Chat </button>
+    <form
+      hx-boost="true"
+      action="/createEmbedding"
+      method="post"
+      hx-push-url="false"
+      hx-swap="none"
+      hx-on::before-send="handleBeforeSend(event)"
+      hx-on::after-request="handleAfterRequest(event)"
+    >
+      <textarea
+        id="talk2dataText"
+        maxlength="4000"
+      ></textarea>
+      <br/>
+      <button onclick="talk2data()" id="talk2dataButton"> Chat </button>
+    </form>
 
     <p id="response"></p>
   </div>
 <script>
-  const createEmbeddingButton = document.getElementById("createEmbeddingButton")
-  const createEmbeddingText = document.getElementById("createEmbeddingText")
-  const talk2dataButton = document.getElementById("talk2dataButton")
-  const talk2dataText = document.getElementById("talk2dataText")
-  const gptResponse = document.getElementById("response")
+  function handleBeforeSend(event) {
+    const textArea = event.target.querySelector("textarea")
+    const button = event.target.querySelector("input[type='submit']")
 
-  const createEmbedding = () => {
-    const text = createEmbeddingText.value
+    textArea.disabled = true
+    button.disabled = true
+  }
 
-    if (!text.length) {
-      return
-    }
+  function handleAfterRequest(event) {
+    const textArea = event.target.querySelector("textarea")
+    const button = event.target.querySelector("input[type='submit']")
 
-    createEmbeddingText.disabled = true
-    createEmbeddingButton.disabled = true
-
-    console.log(createEmbeddingText.value)
-    fetch('/createEmbedding', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({
-        text
-      })
-    })
-      .then(res => res.json())
-      .then(data => {
-        createEmbeddingText.value = ""
-        alert("I learned something new!")
-      })
-      .catch((err) => {
-        alert(err.message)
-      })
-      .finally(() => {
-        createEmbeddingText.disabled = false
-        createEmbeddingButton.disabled = false
-      })
+    textArea.disabled = false
+    button.disabled = false
+    textArea.value = ""
+    alert('I learned something new!')
   }
 
   function talk2data() {
