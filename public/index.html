@@ -88,7 +88,6 @@ button:hover {
       hx-swap="none"
       hx-on::before-send="handleBeforeSend(event)"
       hx-on::after-request="handleAfterAdd(event)"
-      hx-on::after-settle="alert('I learned something new!')"
     >
       <textarea
         name="text"
@@ -153,40 +152,6 @@ button:hover {
     textArea.disabled = false
     button.disabled = false
     textArea.value = ""
-  }
-
-  function talk2data() {
-    const prompt = talk2dataText.value
-
-    if (!prompt) {
-      return
-    }
-
-    talk2dataButton.disabled = true
-    talk2dataText.disabled = true
-    gptResponse.innerHTML = "Loading..."
-
-    fetch('/chat', {
-      method: 'POST',
-      headers: {
-          'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({
-          prompt
-      })
-    })
-      .then(res => res.json())
-      .then(data => {
-        gptResponse.innerHTML = data.response
-        talk2dataText.value = ""
-      })
-      .catch((err) => {
-        alert(err.message)
-      })
-      .finally(() => {
-        talk2dataButton.disabled = false
-        talk2dataText.disabled = false
-      })
   }
 </script>
 </body>
