@@ -42,12 +42,10 @@ void (async () => {
     res.json({ success: true })
   })
 
-  app.post("/chat", async (req, res) => {
+  app.post("/chat", urlencoded({ "extended": true }), async (req, res) => {
     try {
-    const output = await chat(req.body.prompt, redisClient)
-    res.json({
-      response: output
-    })
+      const output = await chat(req.body.text, redisClient)
+      res.send(output)
     } catch(err) {
       console.log("Error in /chat", err)
       res.status(500).send(err)
