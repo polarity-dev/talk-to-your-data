@@ -1,0 +1,20 @@
+<form
+  hx-boost="true"
+  action="/createEmbedding"
+  method="post"
+  hx-push-url="false"
+  hx-swap="outerHTML"
+  hx-target="this"
+  hx-on::before-send="handleBeforeSend(event)"
+  hx-on::after-settle="alert('I learned something new!')"
+>
+  <textarea
+    name="text"
+    maxlength="4000"
+  ></textarea>
+  <br/>
+  <input
+    type="submit"
+    value="Add data"
+  />
+</form>

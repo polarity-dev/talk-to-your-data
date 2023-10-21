@@ -1,8 +1,11 @@
 require("dotenv").config()
-const  { createClient } = require("redis")
+const path = require("path")
+const { createClient } = require("redis")
 const express = require("express")
 const { randomUUID } = require("crypto")
 const { addEmbedding, chat, createRedisStackIndex } = require("./core")
+
+const { engine } = require("express-handlebars")
 
 const { urlencoded } = express
 
@@ -12,6 +15,11 @@ const {
 
 void (async () => {
   const app = express()
+
+  app.engine(".hbs", engine({ "extname": ".hbs", "partialsDir": path.resolve(__dirname, "views", "partials"), "layout": "none" }))
+  app.set("view engine", ".hbs")
+  app.set("views", path.resolve(__dirname, "views"))
+
   const redisClient = createClient()
 
   redisClient.on('error', err => {
@@ -34,18 +42,22 @@ void (async () => {
 
   app.use(express.json())
 
+  app.get("/", (req, res) => {
+    res.render("index")
+  })
+
   app.post("/createEmbedding", urlencoded({ "extended": true }), async (req, res) => {
     const text = req.body.text
     const id = randomUUID()
     await addEmbedding(redisClient, id, text)
     console.log("Embedding created:", id, text)
-    res.json({ success: true })
+    res.render("partials/add-data")
   })
 
   app.post("/chat", urlencoded({ "extended": true }), async (req, res) => {
     try {
       const output = await chat(req.body.text, redisClient)
-      res.send(output)
+      res.render("partials/chat", { "response": output })
     } catch(err) {
       console.log("Error in /chat", err)
       res.status(500).send(err)
